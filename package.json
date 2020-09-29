@@ -12,5 +12,12 @@
     "nohoist": [
       "**"
     ]
+  },
+  "scripts": {
+    "dev:app": "yarn workspace app dev",
+    "dev:web": "yarn workspace web dev",
+    "build:app": "yarn workspace app build",
+    "build:web": "yarn workspace web build",
+    "clean:modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
   }
 }
