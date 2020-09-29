@@ -1,6 +1,14 @@
 import colors from 'vuetify/es5/util/colors'
+import envList from './env'
 
-export default {
+const environment = process.env.NODE_ENV || 'development'
+// @ts-ignore
+const env = envList[environment]
+const isProduction = env.NODE_ENV === 'production'
+const isDev = env.NODE_ENV === 'development'
+const isApp = env.TARGET === 'app'
+
+const baseConfig = {
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
 
@@ -63,3 +71,60 @@ export default {
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {},
 }
+
+const appConfig = {
+  ...baseConfig,
+  // ssr: false,
+  // target: 'static',
+  dev: isDev,
+  server: {
+    host: env.NUXT_HOST,
+    port: env.NUXT_PORT,
+  },
+  /*
+   ** Electronではhashモードじゃないとだめ
+   ** https://nklayman.github.io/vue-cli-plugin-electron-builder/guide/commonIssues.html#blank-screen-on-builds-but-works-fine-on-serve
+   */
+  router: {
+    ...baseConfig.router,
+    base: undefined,
+    mode: 'hash',
+  },
+  build: {
+    ...baseConfig.build,
+    extend(config, ctx) {
+      baseConfig.build?.extend && baseConfig.build?.extend(config, ctx)
+      if (!isDev) {
+        // absolute path to files on production (default value: '/_nuxt/')
+        // @ts-ignore
+        config.output.publicPath = '_nuxt/'
+      }
+      config.target = 'web'
+      config.node = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        __dirname: !isProduction,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        __filename: !isProduction,
+      }
+    },
+  },
+  loaders: {
+    ts: {
+      loaderOptions: {
+        compileOptions: {
+          target: 'es5',
+          module: 'commonjs',
+        },
+      },
+    },
+  },
+  generate: {
+    ...baseConfig.generate,
+    dir: '../../packages/app/dist/nuxt-build',
+  },
+  telemetry: false,
+}
+
+const config = isApp ? appConfig : baseConfig
+
+export default config
