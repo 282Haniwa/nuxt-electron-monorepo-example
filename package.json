@@ -1,0 +1,16 @@
+{
+  "name": "nuxt-electron-monorepo-example",
+  "version": "1.0.0",
+  "author": "282Haniwa",
+  "license": "MIT",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/app",
+      "packages/web"
+    ],
+    "nohoist": [
+      "**"
+    ]
+  }
+}
